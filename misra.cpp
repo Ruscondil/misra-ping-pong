@@ -1,20 +1,20 @@
 #include "misra.h"
 
-Worker::Worker() : stop(false) {}
+Misra::Misra(Sender &sender) : sender(sender), mi(0), ping(1), pong(-ping), ping_state_(PING_OUTSIDE), stop(false) {}
 
-void Worker::start()
+void Misra::startWorker()
 {
-    worker_thread = std::thread(&Worker::run, this);
+    worker_thread = std::thread(&Misra::runWorker, this);
 }
 
-void Worker::enterCriticalSection()
+void Misra::enterCriticalSection()
 {
-    std::lock_guard<std::mutex> lock(mtx);
     std::cout << "Entering critical section" << std::endl;
+    acquirePing();
     // Perform critical section operations
 }
 
-void Worker::run()
+void Misra::runWorker()
 {
     // Generate a random duration between 0.5 and 3 seconds
     std::random_device rd;
@@ -26,9 +26,8 @@ void Worker::run()
     std::this_thread::sleep_for(std::chrono::duration<double>(duration));
     stop = true;
     std::cout << "Exiting critical section after " << duration << " seconds" << std::endl;
+    releasePing();
 }
-
-Misra::Misra(Sender &sender) : sender(sender), mi(0), ping(1), pong(-ping), ping_state_(PING_OUTSIDE) {}
 
 void Misra::regenerate(int64_t &x)
 {
@@ -64,13 +63,13 @@ void Misra::process(int64_t number)
         {
             ping_state_ = PING_INSIDE;
             std::cout << "State changed to PING_INSIDE" << std::endl;
-
-            worker.enterCriticalSection();
-            worker.start();
         }
-        else
+        else if (ping_state_ == PING_INSIDE)
         {
-            std::cout << "Second ping appeared ??" << std::endl;
+            ping_state_ = IN_SECTION;
+            std::cout << "State changed to IN_SECTION" << std::endl;
+            enterCriticalSection();
+            startWorker();
         }
     }
     else

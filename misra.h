@@ -16,20 +16,6 @@ enum ping_state
     IN_SECTION,
 };
 
-class Worker
-{
-public:
-    Worker();
-    void start();
-    void enterCriticalSection();
-
-private:
-    void run();
-    std::thread worker_thread;
-    std::mutex mtx;
-    bool stop;
-};
-
 class Misra
 {
 public:
@@ -39,15 +25,19 @@ public:
     void process(int64_t number);
     void acquirePing();
     void releasePing();
+    void startWorker();
+    void enterCriticalSection();
 
 private:
+    void runWorker();
     int64_t mi;
     int64_t ping;
     int64_t pong;
     Sender &sender;
     ping_state ping_state_;
-    Worker worker;
+    std::thread worker_thread;
     std::mutex mtx;
+    bool stop;
 };
 
 #endif // MISRA_H
