@@ -6,15 +6,16 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc != 4)
+    if (argc != 5)
     {
-        std::cerr << "Usage: " << argv[0] << " <address> <send_port> <receive_port>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <address> <send_port> <receive_port> <starting>" << std::endl;
         return 1;
     }
 
     std::string address = argv[1];
     int send_port = std::stoi(argv[2]);
     int receive_port = std::stoi(argv[3]);
+    bool starting = std::stoi(argv[4]);
 
     Receiver receiver(receive_port);
     Sender sender(address, send_port);
@@ -22,11 +23,16 @@ int main(int argc, char *argv[])
 
     int client_socket = receiver.acceptConnection();
 
+    if (starting)
+    {
+        std::cout << "Starting" << std::endl;
+        sender.send(1);
+        sender.send(-1);
+    }
+
     while (true)
     {
         int64_t number = receiver.receive(client_socket);
-        std::cout << "Received number: " << number << std::endl;
-
         misra.process(number);
     }
 

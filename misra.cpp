@@ -41,7 +41,7 @@ void Misra::incarnate(int64_t &x)
 {
     ping = std::abs(x) + 1;
     pong = -ping;
-    std::cout << "Incarnated: ping = " << ping << ", pong = " << pong << std::endl;
+    // std::cout << "Incarnated: ping = " << ping << ", pong = " << pong << std::endl;
 }
 
 void Misra::process(int64_t number)
@@ -53,7 +53,7 @@ void Misra::process(int64_t number)
         {
             regenerate(ping);
             sender.send(pong);
-            std::cout << "Sent PONG: " << pong << std::endl;
+            // std::cout << "Sent PONG: " << pong << std::endl;
         }
         else
         {
@@ -64,18 +64,18 @@ void Misra::process(int64_t number)
         {
             ping_state_ = PING_INSIDE;
             std::cout << "State changed to PING_INSIDE" << std::endl;
-        }
-        else if (ping_state_ == PING_INSIDE)
-        {
-            ping_state_ = IN_SECTION;
-            std::cout << "State changed to IN_SECTION" << std::endl;
+
             worker.enterCriticalSection();
             worker.start();
+        }
+        else
+        {
+            std::cout << "Second ping appeared ??" << std::endl;
         }
     }
     else
     { // PONG
-        std::cout << "Received PONG: " << number << std::endl;
+        // std::cout << "Received PONG: " << number << std::endl;
         if (ping_state_ == IN_SECTION)
         {
             incarnate(pong);
@@ -86,7 +86,7 @@ void Misra::process(int64_t number)
             {
                 regenerate(pong);
                 sender.send(ping);
-                std::cout << "Sent PING: " << ping << std::endl;
+                // std::cout << "Sent PING: " << ping << std::endl;
                 mi = pong;
             }
             else
@@ -96,6 +96,22 @@ void Misra::process(int64_t number)
             }
         }
         sender.send(pong);
-        std::cout << "Sent PONG: " << pong << std::endl;
+        // std::cout << "Sent PONG: " << pong << std::endl;
     }
+}
+
+void Misra::acquirePing()
+{
+    mtx.lock();
+    ping_state_ = IN_SECTION;
+    std::cout << "Acquired PING, state changed to IN_SECTION" << std::endl;
+}
+
+void Misra::releasePing()
+{
+    sender.send(ping);
+    mi = ping;
+    ping_state_ = PING_OUTSIDE;
+    std::cout << "Released PING, state changed to PING_OUTSIDE" << std::endl;
+    mtx.unlock();
 }

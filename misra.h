@@ -37,6 +37,8 @@ public:
     void regenerate(int64_t &x);
     void incarnate(int64_t &x);
     void process(int64_t number);
+    void acquirePing();
+    void releasePing();
 
 private:
     int64_t mi;
@@ -45,6 +47,7 @@ private:
     Sender &sender;
     ping_state ping_state_;
     Worker worker;
+    std::mutex mtx;
 };
 
 #endif // MISRA_H
