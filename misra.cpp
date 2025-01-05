@@ -7,10 +7,19 @@ void Misra::startWorker()
     worker_thread = std::thread(&Misra::runWorker, this);
 }
 
+void Misra::joinWorker()
+{
+    if (worker_thread.joinable())
+    {
+        worker_thread.join();
+    }
+}
+
 void Misra::enterCriticalSection()
 {
     std::cout << "Entering critical section" << std::endl;
     acquirePing();
+    startWorker();
     // Perform critical section operations
 }
 
@@ -64,17 +73,12 @@ void Misra::process(int64_t number)
             ping_state_ = PING_INSIDE;
             std::cout << "State changed to PING_INSIDE" << std::endl;
         }
-        else if (ping_state_ == PING_INSIDE)
-        {
-            ping_state_ = IN_SECTION;
-            std::cout << "State changed to IN_SECTION" << std::endl;
-            enterCriticalSection();
-            startWorker();
-        }
+        enterCriticalSection();
+        joinWorker();
     }
     else
     { // PONG
-        // std::cout << "Received PONG: " << number << std::endl;
+        std::cout << "Received PONG: " << number << std::endl;
         if (ping_state_ == IN_SECTION)
         {
             incarnate(pong);
@@ -108,9 +112,9 @@ void Misra::acquirePing()
 
 void Misra::releasePing()
 {
+    std::cout << "Released PING, state changed to PING_OUTSIDE" << std::endl;
+    mtx.unlock();
     sender.send(ping);
     mi = ping;
     ping_state_ = PING_OUTSIDE;
-    std::cout << "Released PING, state changed to PING_OUTSIDE" << std::endl;
-    mtx.unlock();
 }

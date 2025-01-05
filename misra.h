@@ -26,6 +26,7 @@ public:
     void acquirePing();
     void releasePing();
     void startWorker();
+    void joinWorker();
     void enterCriticalSection();
 
 private:
