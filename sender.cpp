@@ -1,50 +1,41 @@
-#include <iostream>
-#include <cstring>
-#include <arpa/inet.h>
-#include <unistd.h>
+#include "sender.h"
+#include <thread>
+#include <chrono>
 
-class Sender
+Sender::Sender(const std::string &address, int port)
 {
-public:
-    Sender(const std::string &address, int port)
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0)
     {
-        sockfd = socket(AF_INET, SOCK_STREAM, 0);
-        if (sockfd < 0)
-        {
-            std::cerr << "Error opening socket" << std::endl;
-            exit(1);
-        }
-
-        server_addr.sin_family = AF_INET;
-        server_addr.sin_port = htons(port);
-        if (inet_pton(AF_INET, address.c_str(), &server_addr.sin_addr) <= 0)
-        {
-            std::cerr << "Invalid address/ Address not supported" << std::endl;
-            exit(1);
-        }
-
-        if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-        {
-            std::cerr << "Connection Failed" << std::endl;
-            exit(1);
-        }
+        std::cerr << "Error opening socket" << std::endl;
+        exit(1);
     }
 
-    void send(int64_t number)
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    if (inet_pton(AF_INET, address.c_str(), &server_addr.sin_addr) <= 0)
     {
-        int64_t be_number = htobe64(number);
-        if (write(sockfd, &be_number, sizeof(be_number)) < 0)
-        {
-            std::cerr << "Error sending data" << std::endl;
-        }
+        std::cerr << "Invalid address/ Address not supported" << std::endl;
+        exit(1);
     }
 
-    ~Sender()
+    while (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
     {
-        close(sockfd);
+        std::cerr << "Connection Failed, retrying in 1 second..." << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+}
 
-private:
-    int sockfd;
-    struct sockaddr_in server_addr;
-};
+void Sender::send(int64_t number)
+{
+    int64_t be_number = htobe64(number);
+    if (write(sockfd, &be_number, sizeof(be_number)) < 0)
+    {
+        std::cerr << "Error sending data" << std::endl;
+    }
+}
+
+Sender::~Sender()
+{
+    close(sockfd);
+}

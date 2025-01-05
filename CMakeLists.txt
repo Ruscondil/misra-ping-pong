@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 project(MisraPingPong)
 
 # Add the executable
-add_executable(MisraPingPong main.cpp sender.cpp receiver.cpp)
+add_executable(MisraPingPong main.cpp sender.cpp receiver.cpp misra.cpp)
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR})

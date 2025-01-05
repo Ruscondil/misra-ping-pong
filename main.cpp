@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
-#include "sender.cpp"
-#include "receiver.cpp"
-#include "misra.cpp"
+#include "sender.h"
+#include "receiver.h"
+#include "misra.h"
 
 int main(int argc, char *argv[])
 {
