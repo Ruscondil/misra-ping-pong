@@ -11,7 +11,27 @@
 # Ignore node_modules if using a frontend framework
 node_modules/
 
+# Ignore build directory
+/build/
+
+# Ignore CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore compiled files
+*.o
+*.obj
+*.exe
+*.out
+
 # Ignore IDE specific files
 .idea/
 .vscode/
 *.iml
+
+# Ignore backup files
+*.bak
+*.tmp
+*.swp
