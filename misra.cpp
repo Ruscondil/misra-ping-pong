@@ -49,7 +49,7 @@ void Misra::runWorker()
         work_available = false;
         lock.unlock();
 
-        acquirePing();
+        lockPing();
 
         // Generate a random duration between 0.5 and 3 seconds
         std::random_device rd;
@@ -61,7 +61,7 @@ void Misra::runWorker()
         std::this_thread::sleep_for(std::chrono::duration<double>(duration));
         std::cout << "Exiting critical section after " << duration << " seconds" << std::endl;
 
-        releasePing();
+        unlockPing();
     }
 }
 
@@ -124,14 +124,14 @@ void Misra::process(int64_t number)
     }
 }
 
-void Misra::acquirePing()
+void Misra::lockPing()
 {
     std::lock_guard<std::mutex> lock(mtx);
     ping_state_ = IN_SECTION;
     std::cout << "Acquired PING, state changed to IN_SECTION" << std::endl;
 }
 
-void Misra::releasePing()
+void Misra::unlockPing()
 {
     std::lock_guard<std::mutex> lock(mtx);
     sender.send(ping);

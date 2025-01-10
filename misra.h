@@ -24,8 +24,8 @@ public:
     void regenerate(int64_t &x);
     void incarnate(int64_t &x);
     void process(int64_t number);
-    void acquirePing();
-    void releasePing();
+    void lockPing();
+    void unlockPing();
     void startWorker();
     void notifyWorker();
 
