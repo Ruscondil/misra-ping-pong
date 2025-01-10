@@ -7,6 +7,7 @@
 #include <mutex>
 #include <chrono>
 #include <random>
+#include <condition_variable>
 #include "sender.h"
 
 enum ping_state
@@ -20,14 +21,14 @@ class Misra
 {
 public:
     Misra(Sender &sender);
+    ~Misra();
     void regenerate(int64_t &x);
     void incarnate(int64_t &x);
     void process(int64_t number);
     void acquirePing();
     void releasePing();
     void startWorker();
-    void joinWorker();
-    void enterCriticalSection();
+    void notifyWorker();
 
 private:
     void runWorker();
@@ -38,7 +39,10 @@ private:
     ping_state ping_state_;
     std::thread worker_thread;
     std::mutex mtx;
+    std::condition_variable cv;
     bool stop;
+    bool worker_done;
+    bool work_available;
 };
 
 #endif // MISRA_H
