@@ -13,7 +13,6 @@
 enum ping_state
 {
     PING_OUTSIDE,
-    PING_INSIDE,
     IN_SECTION,
 };
 

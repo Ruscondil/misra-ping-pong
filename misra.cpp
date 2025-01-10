@@ -95,11 +95,6 @@ void Misra::process(int64_t number)
             ping = number;
         }
 
-        if (ping_state_ == PING_OUTSIDE)
-        {
-            ping_state_ = PING_INSIDE;
-            std::cout << "State changed to PING_INSIDE" << std::endl;
-        }
         notifyWorker();
     }
     else
